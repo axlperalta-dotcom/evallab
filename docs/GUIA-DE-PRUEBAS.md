@@ -1,0 +1,41 @@
+# Tu primera sesión con EvalLab
+
+No necesitas programar. Tu papel es revisar si el resultado tiene sentido y si la aplicación permite entender por qué ocurrió.
+
+## Recorrido de diez minutos
+
+1. Abre http://127.0.0.1:3001 y revisa los cuatro casos de ejemplo.
+2. En «Una respuesta breve y útil», compara A y B. La respuesta B no incluye «datos».
+3. Ejecuta A y abre sus resultados. Dos casos cumplen y dos no cumplen: 50%.
+4. Abre «Evitar promesas absolutas». La respuesta dice «no garantiza cero errores», pero la regla encuentra el fragmento excluido. Marca **Estoy en desacuerdo** y explica por qué.
+5. Recarga, entra a Ejecuciones y vuelve a abrir el resultado: tu revisión debe seguir ahí y el resultado automático no debe haber cambiado.
+6. Ejecuta B con los mismos casos. En Comparar verás otro 50%, pero en casos distintos. Comprueba que ahora se entiende por qué un empate no basta.
+7. Modifica una regla, guarda y ejecuta otra vez. Al comparar con una ejecución anterior, debe aparecer un aviso de criterios diferentes.
+8. Crea un caso propio, prueba guardarlo sin reglas y confirma que te pide corregirlo sin perder lo escrito.
+9. Pausa ese caso y comprueba que la siguiente ejecución no lo incluya. Elimínalo si ya no lo necesitas; las ejecuciones anteriores deben conservarlo.
+10. Prueba una ventana estrecha, Tab y Escape. La navegación y los formularios deben seguir siendo utilizables.
+
+Los errores del motor se comprueban mediante pruebas automatizadas; los cuatro ejemplos iniciales tienen reglas válidas. No necesitas provocar un fallo técnico para revisar el producto.
+
+## Un caso propio sencillo
+
+- Nombre: Respuesta para una entrevista.
+- Instrucción: Explica el objetivo de CareerOps usando las palabras vacantes y proyectos, en no más de 150 caracteres.
+- Respuesta A: CareerOps organiza vacantes y proyectos para reunir evidencia de trabajo.
+- Respuesta B: Es una aplicación útil para organizar cosas.
+- Reglas: debe incluir `vacantes, proyectos`; longitud máxima `150`.
+
+Es un ejercicio de coincidencia de texto. No califica tu preparación para una entrevista ni la calidad completa de la explicación.
+
+## Qué reportar
+
+```text
+Pantalla: Casos / Ejecuciones / Comparar
+Qué hice:
+Qué esperaba:
+Qué ocurrió:
+¿Puedo repetirlo?:
+Impacto: me bloquea / me dificulta / detalle visual
+```
+
+También sirven observaciones como «no entiendo qué cuenta este porcentaje», «no encuentro dónde cambiar una respuesta» o «esta regla está calificando algo distinto de lo que quiero». Esas decisiones guían la siguiente versión.
