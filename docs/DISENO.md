@@ -36,4 +36,14 @@ En escritorio, la lista y la ficha comparten espacio. En móvil se apilan; elegi
 
 Se usan controles nativos de formulario, `dialog` y `details`, foco visible, acceso directo al contenido y botones con selección anunciada. No se añaden animaciones, fuentes remotas ni llamadas de terceros. Esto no equivale a una certificación de accesibilidad.
 
-Las pruebas de navegador cubren el recorrido original, búsqueda sin perder el foco, selección con teclado, filtros vacíos, conservación de datos, evidencia de comparación y anchos de 320 a 390 píxeles con fuente alternativa. Las pruebas usan bases separadas. La aprobación visual de esta nueva versión corresponde a la siguiente revisión del usuario.
+Las pruebas de navegador cubren el recorrido original, búsqueda sin perder el foco, selección con teclado, filtros vacíos, conservación de datos, evidencia de comparación y anchos de 320 a 390 píxeles con fuente alternativa. Las pruebas usan bases separadas. El usuario aprobó la personalidad y el estilo del rediseño. Su siguiente observación fue que una persona sin experiencia necesitaba contexto para orientarse.
+
+## Orientación dentro del producto
+
+La pestaña Guía añade un manual accesible desde la navegación superior. Conserva los títulos serif, la numeración y los colores del laboratorio. El propósito y el recorrido inicial están visibles; las reglas y la privacidad usan apartados desplegables. Un índice permite saltar a cada sección y mueve el foco al título para quienes usan teclado.
+
+El ejemplo A/B es explicativo y no escribe datos. El acceso «Ir a Casos para empezar» conserva los filtros existentes. La guía describe los límites reales: no hay modelo conectado, autenticación, cifrado de la base ni filtro automático de lenguaje; eliminar un caso no borra las copias históricas. También aclara la posible sincronización externa de la carpeta por OneDrive.
+
+La prueba de navegador añadida cubre acceso, selección de la pestaña, saltos con teclado, lectura de apartados, anchos móviles y regreso a los casos sin mutaciones.
+
+![Guía de EvalLab dentro de la aplicación](images/guide.png)

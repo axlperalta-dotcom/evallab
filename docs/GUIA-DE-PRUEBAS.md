@@ -2,6 +2,8 @@
 
 No necesitas programar. Tu papel es revisar si el resultado tiene sentido y si la aplicación permite entender por qué ocurrió.
 
+La pestaña **Guía** de la aplicación reúne estas instrucciones con un ejemplo, el significado de las reglas y las condiciones de privacidad y uso. Puedes consultarla sin modificar los casos ni las ejecuciones.
+
 ## Recorrido de diez minutos
 
 1. Abre http://127.0.0.1:3001. En el índice, selecciona un caso: su ficha muestra instrucción, A/B y reglas. Usa **Editar caso** para modificarlo. Prueba la búsqueda y el filtro de estado; no alteran qué casos se evalúan.
@@ -30,7 +32,7 @@ Es un ejercicio de coincidencia de texto. No califica tu preparación para una e
 ## Qué reportar
 
 ```text
-Pantalla: Casos / Ejecuciones / Comparar
+Pantalla: Casos / Ejecuciones / Comparar / Guía
 Qué hice:
 Qué esperaba:
 Qué ocurrió:

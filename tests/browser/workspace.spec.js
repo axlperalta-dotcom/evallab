@@ -300,3 +300,80 @@ test("comparison exposes saved answers and remains usable on a narrow screen", a
     fullPage: true,
   });
 });
+
+test("guide explains the workflow and privacy, supports keyboard navigation and preserves cases", async ({
+  page,
+  request,
+}) => {
+  const before = await (await request.get("/api/workspace")).json();
+  await page.goto("/");
+  await page
+    .getByRole("searchbox", { name: "Buscar casos" })
+    .fill("estructura");
+  const guideTab = page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Guía", exact: true });
+  await guideTab.click();
+  await expect(guideTab).toHaveAttribute("aria-current", "page");
+  await expect(
+    page.getByRole("heading", { name: "Tu guía de EvalLab" }),
+  ).toBeVisible();
+  await page.screenshot({ path: ".data/guide-desktop.png", fullPage: false });
+  const privacyJump = page.getByRole("button", {
+    name: "Privacidad y uso",
+    exact: true,
+  });
+  await privacyJump.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#guide-privacy")).toBeFocused();
+  const privacy = page
+    .locator(".guide-chapter")
+    .filter({ has: page.locator("#guide-privacy") });
+  for (const summary of await privacy.locator("summary").all()) {
+    await summary.click();
+  }
+  await expect(
+    privacy.getByText(/las ejecuciones anteriores conservan una copia/),
+  ).toBeVisible();
+  await expect(
+    privacy.getByText(/La aplicación no ofrece inicio de sesión ni cifra/),
+  ).toBeVisible();
+  await expect(
+    privacy.getByText(/EvalLab no incluye un filtro automático/),
+  ).toBeVisible();
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    await expect(guideTab).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  }
+  await page
+    .getByRole("button", { name: "Las cuatro reglas", exact: true })
+    .click();
+  const jsonHelp = page
+    .locator(".guide-questions details")
+    .filter({ hasText: "JSON con campos" });
+  await jsonHelp.locator("summary").click();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page
+    .getByRole("button", { name: /Volver al inicio de la guía/ })
+    .click();
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.screenshot({ path: ".data/guide-mobile.png", fullPage: false });
+  await page.getByRole("button", { name: /Ir a Casos para empezar/ }).click();
+  await expect(
+    page.getByRole("heading", { name: "Tus casos de prueba" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("searchbox", { name: "Buscar casos" }),
+  ).toHaveValue("estructura");
+  await expect(page.locator("#main")).toBeFocused();
+  expect(await (await request.get("/api/workspace")).json()).toEqual(before);
+});

@@ -7,7 +7,12 @@ const esc = (value) =>
         c
       ],
   );
-const labels = { cases: "Casos", runs: "Ejecuciones", compare: "Comparar" };
+const labels = {
+  cases: "Casos",
+  runs: "Ejecuciones",
+  compare: "Comparar",
+  guide: "Guía",
+};
 const statuses = {
   passed: "Cumple",
   failed: "No cumple",
@@ -174,6 +179,98 @@ function caseView() {
     `<div class="case-toolbar"><label class="search-field"><span aria-hidden="true">⌕</span><input type="search" id="case-search" aria-label="Buscar casos" placeholder="Buscar por nombre, instrucción o regla…" value="${esc(caseQuery)}"></label><label class="filter-field">Mostrar<select id="case-filter" aria-label="Estado de los casos"><option value="all" ${caseFilter === "all" ? "selected" : ""}>Todos los casos</option><option value="active" ${caseFilter === "active" ? "selected" : ""}>Solo activos</option><option value="paused" ${caseFilter === "paused" ? "selected" : ""}>Solo pausados</option></select></label></div><div class="case-workspace" id="case-workspace">${caseWorkspace()}</div><div class="experiment-bar"><div><span class="ready-dot" aria-hidden="true"></span><strong>${active} ${active === 1 ? "caso listo" : "casos listos"}</strong><span>Se evalúan todos los activos, aunque estén ocultos por el filtro.</span></div>${runButton}</div>`
   );
 }
+function guideView() {
+  return (
+    header(
+      "MANUAL DE CAMPO / EMPEZAR AQUÍ",
+      "Tu guía de EvalLab",
+      "Aprende a comprobar una respuesta y a explicar el resultado. No necesitas programar.",
+    ) +
+    `
+    <div class="guide-layout">
+      <aside class="guide-index" aria-labelledby="guide-index-title">
+        <p class="field-caption" id="guide-index-title">EN ESTA GUÍA</p>
+        <ol>
+          <li><button data-action="guide-section" data-id="guide-purpose">Para qué sirve</button></li>
+          <li><button data-action="guide-section" data-id="guide-start">Tu primera evaluación</button></li>
+          <li><button data-action="guide-section" data-id="guide-results">Entender los resultados</button></li>
+          <li><button data-action="guide-section" data-id="guide-rules">Las cuatro reglas</button></li>
+          <li><button data-action="guide-section" data-id="guide-privacy">Privacidad y uso</button></li>
+        </ol>
+        <p>Ten esta guía a mano. Puedes volver a ella desde cualquier pantalla.</p>
+      </aside>
+      <div class="guide-pages">
+        <section class="guide-chapter" aria-labelledby="guide-purpose">
+          <p class="eyebrow">01 / EL PROPÓSITO</p>
+          <h2 id="guide-purpose" tabindex="-1">Una respuesta puede sonar bien. ¿Cumple lo que pediste?</h2>
+          <p>EvalLab es un laboratorio personal para comprobar respuestas con condiciones que tú eliges. Sirve para practicar evaluaciones de IA, comparar alternativas y detectar cuándo una regla necesita mejorar.</p>
+          <p>Tú escribes o pegas dos respuestas, <strong>A y B</strong>. EvalLab revisa su texto; esta versión no genera respuestas ni está conectada a un modelo de IA.</p>
+          <dl class="guide-map">
+            <div><dt>Casos</dt><dd>Preparas la instrucción, las dos respuestas y las reglas. Ese conjunto es un <strong>caso de prueba</strong>.</dd></div>
+            <div><dt>Ejecuciones</dt><dd>Guardas una evaluación de los casos activos, como una foto de sus respuestas y reglas en ese momento.</dd></div>
+            <div><dt>Comparar</dt><dd>Ves qué cambió entre dos ejecuciones y abres cada caso para investigar la diferencia.</dd></div>
+          </dl>
+        </section>
+        <section class="guide-chapter" aria-labelledby="guide-start">
+          <p class="eyebrow">02 / MANOS A LA OBRA</p>
+          <h2 id="guide-start" tabindex="-1">Tu primera evaluación, paso a paso</h2>
+          <ol class="guide-steps">
+            <li><div><h3>Prepara un caso</h3><p>En <strong>Casos</strong>, selecciona uno para leerlo o pulsa <strong>Nuevo caso</strong>. Escribe qué pides, añade A y B, activa al menos una regla y guarda. Para cambiar un caso existente, usa <strong>Editar caso</strong>.</p></div></li>
+            <li><div><h3>Prueba las respuestas A</h3><p>Pulsa <strong>Ejecutar evaluación</strong>, pon un nombre que reconozcas y elige A. Se comprueban todos los casos activos, incluso los que una búsqueda o filtro oculte. Un caso pausado queda fuera.</p></div></li>
+            <li><div><h3>Lee y añade tu criterio</h3><p>Abre un resultado para ver qué regla cumplió o falló. En <strong>Tu revisión</strong>, indica si estás de acuerdo y explica por qué. Esta revisión se guarda por separado; no cambia el resultado automático.</p></div></li>
+            <li><div><h3>Prueba B y compara</h3><p>Desde <strong>Ejecuciones</strong>, crea otra evaluación con B. Mantén los mismos casos, instrucciones y reglas. En <strong>Comparar</strong>, elige ambas ejecuciones y despliega una fila para leer la evidencia.</p></div></li>
+          </ol>
+          <div class="guide-example">
+            <p class="field-caption">EJEMPLO PARA TU PROPIO CASO</p>
+            <h3>Una explicación de CareerOps</h3>
+            <p><strong>Instrucción:</strong> explica para qué sirve CareerOps usando las palabras «vacantes» y «proyectos».</p>
+            <p><strong>Regla:</strong> activa «Debe incluir» y escribe <code>vacantes, proyectos</code>.</p>
+            <div class="guide-example-answers">
+              <div><span class="variant">A</span><p>CareerOps organiza vacantes y proyectos para reunir evidencia de trabajo.</p>${badge("passed")}</div>
+              <div><span class="variant">B</span><p>Es una aplicación para organizar ideas.</p>${badge("failed")}</div>
+            </div>
+            <p class="help">A incluye ambos términos; B no. Es un ejemplo explicativo, no una ejecución guardada. El porcentaje de una ejecución también cuenta los demás casos activos.</p>
+          </div>
+          <button class="button primary" data-action="nav" data-view="cases">Ir a Casos para empezar <span aria-hidden="true">↗</span></button>
+        </section>
+        <section class="guide-chapter" aria-labelledby="guide-results">
+          <p class="eyebrow">03 / LEER CON CRITERIO</p>
+          <h2 id="guide-results" tabindex="-1">Qué te dice cada resultado</h2>
+          <dl class="guide-outcomes">
+            <div><dt>${badge("passed")}</dt><dd>La respuesta cumple todas las reglas del caso. Eso no garantiza que sea correcta o útil en todos los sentidos.</dd></div>
+            <div><dt>${badge("failed")}</dt><dd>Al menos una regla no se cumplió. Abre el detalle y revisa si la condición representa lo que realmente buscas.</dd></div>
+            <div><dt>${badge("error")}</dt><dd>La configuración o el motor de evaluación fallaron. La respuesta no se calificó: revisa ese problema antes de comparar porcentajes.</dd></div>
+          </dl>
+          <p><strong>El porcentaje cuenta casos que cumplen todas sus reglas.</strong> Si cumplen 2 de 4 casos evaluables, verás 50%. Los errores del evaluador se excluyen del cálculo. Dos ejecuciones pueden tener el mismo porcentaje y fallar en casos distintos.</p>
+          <div class="guide-note"><h3>Una regla puede perderse el contexto</h3><p>«No garantiza cero errores» contiene el fragmento «garantiza cero errores». Una regla que lo excluya marcará un fallo, aunque la frase esté negando la promesa. Tu revisión sirve para explicar esa diferencia.</p></div>
+          <p>Si cambias los casos, instrucciones o reglas entre ejecuciones, EvalLab avisa que las tasas no son comparables. La revisión humana expresa tu criterio; tampoco es una garantía de calidad.</p>
+        </section>
+        <section class="guide-chapter" aria-labelledby="guide-rules">
+          <p class="eyebrow">04 / TUS HERRAMIENTAS</p>
+          <h2 id="guide-rules" tabindex="-1">Las cuatro reglas de evaluación</h2>
+          <p>Puedes combinar de una a cuatro reglas por caso. Para que el caso cumpla, deben cumplirse todas.</p>
+          <div class="guide-questions">
+            <details><summary>Debe incluir / No debe incluir</summary><div><p>Buscan fragmentos de texto sin distinguir mayúsculas. Separa los términos con comas. «Debe incluir» exige todos; «No debe incluir» falla si aparece cualquiera de los excluidos.</p><p>Buscan fragmentos, no el significado de la frase. Por ejemplo, «dato» también aparece dentro de «datos».</p></div></details>
+            <details><summary>Longitud máxima</summary><div><p>Limita la respuesta a un número de caracteres entre 1 y 10,000, incluidos espacios y saltos de línea. No es un conteo de palabras. Algunos símbolos compuestos pueden contar como varios caracteres.</p></div></details>
+            <details><summary>JSON con campos</summary><div><p>JSON es un formato de texto con nombres y valores. Por ejemplo: <code>{"titulo":"Revisar formulario","prioridad":"alta"}</code>.</p><p>Si configuras <code>titulo, prioridad</code>, la regla exige esos nombres exactos en el primer nivel. No comprueba si sus valores son correctos. La respuesta debe ser solo el objeto JSON, sin explicaciones ni bloques de Markdown.</p></div></details>
+          </div>
+        </section>
+        <section class="guide-chapter" aria-labelledby="guide-privacy">
+          <p class="eyebrow">05 / CUIDAR TU TRABAJO</p>
+          <h2 id="guide-privacy" tabindex="-1">Privacidad, seguridad y normas de uso</h2>
+          <p>Esta versión es un prototipo local para una persona. Usa ejemplos ficticios o textos que tengas permiso de utilizar.</p>
+          <div class="guide-questions">
+            <details><summary>¿Dónde se guardan mis datos?</summary><div><p>Los casos, ejecuciones y revisiones se guardan en una base de datos de esta computadora. Cerrar o recargar el navegador no los borra. EvalLab no envía esas respuestas a servicios de IA.</p><p>La aplicación no ofrece inicio de sesión ni cifra la base de datos. Otra persona con acceso a los archivos podría leerla. Si la carpeta está dentro de OneDrive u otro servicio de sincronización, ese servicio puede copiarla según su configuración.</p></div></details>
+            <details><summary>¿Qué pasa al editar, pausar o eliminar?</summary><div><p>Editar afecta a futuras evaluaciones. Pausar excluye el caso de la próxima ejecución. Eliminar retira el caso de la biblioteca, pero <strong>las ejecuciones anteriores conservan una copia de sus respuestas y reglas</strong>.</p><p>Eliminar un caso no borra toda su información histórica. Esta versión no tiene un botón para eliminar el historial de ejecuciones. Al actualizar una revisión humana, se conserva su última versión.</p></div></details>
+            <details><summary>¿Qué normas conviene seguir?</summary><div><ul><li>Evita contraseñas, claves de acceso, información confidencial y datos personales reales.</li><li>Usa lenguaje respetuoso y ejemplos relacionados con lo que quieres comprobar. Si pruebas lenguaje ofensivo, usa ejemplos ficticios y explica el propósito.</li><li>EvalLab no incluye un filtro automático de lenguaje ofensivo. La regla «No debe incluir» solo comprueba los términos que tú configures.</li><li>Al compartir resultados, indica qué reglas usaste y qué límites tienen. Un porcentaje no demuestra por sí solo la calidad de una IA.</li></ul></div></details>
+            <details><summary>¿Cómo cuido mis datos y reporto un problema?</summary><div><p>Para respaldar, detén el servidor y copia la carpeta <code>.data</code> del proyecto a un lugar seguro. El guardado local no crea copias de seguridad automáticas.</p><p>El servidor está preparado para abrirse solo en esta computadora. No lo expongas a Internet como un servicio público: esta versión no tiene cuentas ni separación entre usuarios.</p><p>Si algo falla, anota la pantalla, los pasos, lo que esperabas y lo que ocurrió. Puedes compartir una captura ocultando datos sensibles. Si un guardado se interrumpe, revisa primero si aparece en el historial antes de repetirlo.</p></div></details>
+          </div>
+        </section>
+        <div class="guide-closing"><p>El objetivo es poder explicar <strong>qué comprobaste, qué ocurrió y qué mejorarías</strong>.</p><button class="text-button" data-action="guide-section" data-id="guide-purpose">Volver al inicio de la guía ↑</button></div>
+      </div>
+    </div>`
+  );
+}
 function stats(summary) {
   return `<div class="score-sheet"><div class="score-total"><span class="field-caption">CUMPLIMIENTO</span><strong>${summary.rate === null ? "—" : summary.rate + "%"}</strong><span>${summary.passed} de ${summary.evaluated} casos evaluables</span></div><dl class="score-breakdown"><div><dt><span class="status-dot"></span>Cumplen</dt><dd>${summary.passed}</dd></div><div><dt><span class="status-dot failed-dot"></span>No cumplen</dt><dd>${summary.failed}</dd></div><div><dt><span class="status-dot error-dot"></span>Errores del evaluador</dt><dd>${summary.error}</dd></div></dl><p class="score-explainer">El porcentaje mide <strong>cumplimiento de reglas</strong>, no calidad general.<br>Los errores del evaluador se excluyen del cálculo.</p></div>`;
 }
@@ -266,7 +363,8 @@ async function render() {
     else button.removeAttribute("aria-current");
   });
   try {
-    if (view === "cases") $("#main").innerHTML = caseView();
+    if (view === "guide") $("#main").innerHTML = guideView();
+    else if (view === "cases") $("#main").innerHTML = caseView();
     else if (view === "runs" && !selectedRun) $("#main").innerHTML = runView();
     else if (view === "runs") {
       const run = await api(`/api/run?id=${encodeURIComponent(selectedRun)}`);
@@ -330,6 +428,11 @@ document.addEventListener("click", async (event) => {
   if (!button || busy) return;
   const { action, id } = button.dataset;
   if (action === "close") closeDialog();
+  if (action === "guide-section") {
+    const section = document.getElementById(id);
+    section.focus({ preventScroll: true });
+    section.scrollIntoView({ block: "start" });
+  }
   if (action === "select-case") {
     selectedCase = id;
     refreshCases();
@@ -347,6 +450,10 @@ document.addEventListener("click", async (event) => {
     view = button.dataset.view;
     selectedRun = null;
     await render();
+    if (!button.closest("nav")) {
+      $("#main").focus({ preventScroll: true });
+      $("#main").scrollIntoView({ block: "start" });
+    }
   }
   if (action === "new-case" || action === "edit-case") caseForm(id);
   if (action === "new-run") newRun();
