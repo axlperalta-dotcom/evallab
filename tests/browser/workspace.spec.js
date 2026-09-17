@@ -150,6 +150,39 @@ test("create, validate, edit and delete a case on mobile without executing marku
   await expect(dialog).not.toBeVisible();
 });
 
+test("mobile navigation accommodates fallback fonts and narrow viewports", async ({
+  page,
+}) => {
+  // Linux does not have Segoe UI. Exercise a fallback font on Windows too.
+  await page.route("**/styles.css", async (route) => {
+    const response = await route.fetch();
+    const body = (await response.text()).replace(
+      'Inter, "Segoe UI", Arial, sans-serif',
+      "Arial, sans-serif",
+    );
+    await route.fulfill({ response, body });
+  });
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Tus casos de prueba" }),
+  ).toBeVisible();
+  for (const width of [390, 360, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    const overflowing = await page.evaluate(() =>
+      [...document.querySelectorAll("body *")]
+        .filter((element) => {
+          const box = element.getBoundingClientRect();
+          return box.width > 0 && (box.right > innerWidth + 1 || box.left < -1);
+        })
+        .map((element) => element.tagName + "." + element.className),
+    );
+    expect(overflowing).toEqual([]);
+    await expect(
+      page.getByRole("navigation").getByRole("button", { name: "Comparar" }),
+    ).toBeVisible();
+  }
+});
+
 test("backend rejects rule errors and keeps automatic scoring separate from review", async ({
   request,
 }) => {

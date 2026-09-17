@@ -1169,6 +1169,21 @@ dialog .subtitle {
   }
 }
 @media (max-width: 520px) {
+  .sidebar {
+    padding: 18px 16px;
+  }
+  nav {
+    gap: 4px;
+  }
+  nav button {
+    min-width: 0;
+    gap: 6px;
+    padding: 12px 7px;
+  }
+  .nav-count {
+    padding: 2px 4px;
+    font-size: 10px;
+  }
   .local-label {
     font-size: 9px;
   }
@@ -1301,5 +1316,10 @@ dialog .subtitle {
   }
   .toast {
     font-size: 12px;
+  }
+}
+@media (max-width: 380px) {
+  nav button > span[aria-hidden] {
+    display: none;
   }
 }

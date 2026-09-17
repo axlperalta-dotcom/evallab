@@ -92,7 +92,7 @@ npm run test:e2e
 
 En macOS/Linux sustituye `py -3` por `python3`. Node.js 22 o superior solo es necesario para las pruebas de navegador. Las pruebas Python usan carpetas temporales; las de navegador usan el puerto 3013 y una carpeta nueva `.data/test-browser-*` en cada ejecución. No modifican la base personal. La aplicación sirve sin compilarse.
 
-La suite inicial contiene 22 pruebas Python y 3 recorridos de navegador. Los resultados efectivos se consultan en GitHub Actions; tener un workflow no significa que un commit haya aprobado.
+La suite inicial contiene 22 pruebas Python y 4 pruebas de navegador, incluidas fuentes alternativas y anchos de 320 a 390 píxeles. Los resultados efectivos se consultan en GitHub Actions; tener un workflow no significa que un commit haya aprobado.
 
 ## Desarrollo y alcance del portafolio
 
