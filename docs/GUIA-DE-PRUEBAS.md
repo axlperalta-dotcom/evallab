@@ -4,12 +4,12 @@ No necesitas programar. Tu papel es revisar si el resultado tiene sentido y si l
 
 ## Recorrido de diez minutos
 
-1. Abre http://127.0.0.1:3001 y revisa los cuatro casos de ejemplo.
+1. Abre http://127.0.0.1:3001. En el índice, selecciona un caso: su ficha muestra instrucción, A/B y reglas. Usa **Editar caso** para modificarlo. Prueba la búsqueda y el filtro de estado; no alteran qué casos se evalúan.
 2. En «Una respuesta breve y útil», compara A y B. La respuesta B no incluye «datos».
 3. Ejecuta A y abre sus resultados. Dos casos cumplen y dos no cumplen: 50%.
 4. Abre «Evitar promesas absolutas». La respuesta dice «no garantiza cero errores», pero la regla encuentra el fragmento excluido. Marca **Estoy en desacuerdo** y explica por qué.
 5. Recarga, entra a Ejecuciones y vuelve a abrir el resultado: tu revisión debe seguir ahí y el resultado automático no debe haber cambiado.
-6. Ejecuta B con los mismos casos. En Comparar verás otro 50%, pero en casos distintos. Comprueba que ahora se entiende por qué un empate no basta.
+6. Ejecuta B con los mismos casos. En Comparar verás otro 50%, pero en casos distintos. Despliega una fila para ver las respuestas originales de ambas ejecuciones. Comprueba que ahora se entiende por qué un empate no basta.
 7. Modifica una regla, guarda y ejecuta otra vez. Al comparar con una ejecución anterior, debe aparecer un aviso de criterios diferentes.
 8. Crea un caso propio, prueba guardarlo sin reglas y confirma que te pide corregirlo sin perder lo escrito.
 9. Pausa ese caso y comprueba que la siguiente ejecución no lo incluya. Elimínalo si ya no lo necesitas; las ejecuciones anteriores deben conservarlo.

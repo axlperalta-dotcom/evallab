@@ -4,7 +4,7 @@
 
 Python sirve la interfaz y la API. La biblioteca estándar evita exigir cuentas, contenedores o dependencias de ejecución para este primer laboratorio. SQLite guarda datos persistentes; cada petición abre y cierra su conexión. Las mutaciones se ejecutan con `BEGIN IMMEDIATE` para evitar que una ejecución capture una mezcla de definiciones editadas concurrentemente.
 
-`http.server` se utiliza como servidor local de prototipo; no se plantea como servidor público de producción. La interfaz usa JavaScript sin framework para mantener la superficie de esta primera aplicación pequeña. Node y Playwright son herramientas de prueba, no de ejecución.
+`http.server` se utiliza como servidor local de prototipo; no se plantea como servidor público de producción. La interfaz usa JavaScript sin framework para mantener la superficie de esta primera aplicación pequeña. Node y Playwright son herramientas de prueba, no de ejecución. El rediseño incorpora selección y filtros en memoria del navegador, sin cambiar el esquema ni los comandos de escritura. La comparación lee respuestas y reglas de las copias históricas, no del caso editable. [Decisiones de interfaz](DISENO.md).
 
 ## Evaluación separada de persistencia
 

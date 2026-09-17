@@ -21,6 +21,9 @@ const reviewLabels = {
 let state = { cases: [], runs: [] },
   view = "cases",
   selectedRun = null,
+  selectedCase = null,
+  caseQuery = "",
+  caseFilter = "all",
   comparison = [],
   busy = false,
   toastTimer,
@@ -119,28 +122,65 @@ function ruleDescription(rule) {
   if (rule.type === "max_length") return `Máximo ${rule.value} caracteres`;
   return "Campos JSON: " + rule.value.join(", ");
 }
+const normalizeSearch = (value) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es");
+function visibleCases() {
+  const query = normalizeSearch(caseQuery.trim());
+  return state.cases.filter(
+    (c) =>
+      (caseFilter === "all" ||
+        (caseFilter === "active" ? c.active : !c.active)) &&
+      normalizeSearch(
+        `${c.title} ${c.prompt} ${c.rules.map(ruleDescription).join(" ")}`,
+      ).includes(query),
+  );
+}
+function answerPanel(letter, answer, caption = "Respuesta guardada") {
+  return `<section class="answer-panel"><div class="answer-heading"><span class="variant">${letter}</span><h3>${caption}</h3><span class="character-count">${[...answer].length} car.</span></div><pre>${esc(answer || "(Respuesta vacía)")}</pre></section>`;
+}
+function caseInspector(c) {
+  if (!state.cases.length)
+    return `<div class="empty inspector-empty"><span class="empty-symbol" aria-hidden="true">＋</span><h2>Tu primer experimento empieza aquí</h2><p>Usa «Nuevo caso» para escribir una instrucción, dos respuestas y una regla que quieras comprobar.</p></div>`;
+  if (!c)
+    return `<div class="empty inspector-empty"><span class="empty-symbol" aria-hidden="true">∅</span><h2>No hay casos que mostrar</h2><p>Prueba otra búsqueda o cambia el filtro.</p><button class="button secondary" data-action="clear-search">Mostrar todos los casos</button></div>`;
+  const number = String(
+    state.cases.findIndex((item) => item.id === c.id) + 1,
+  ).padStart(2, "0");
+  return `<article class="case-inspector" aria-labelledby="inspector-title"><header class="inspector-header"><div><p class="eyebrow">FICHA / ${number}</p><h2 id="inspector-title" tabindex="-1">${esc(c.title)}</h2></div><button class="button secondary small" data-action="edit-case" data-id="${c.id}" data-write>Editar caso ↗</button></header><div class="instruction"><span class="field-caption">01 / INSTRUCCIÓN</span><p>${esc(c.prompt)}</p></div><div class="response-section"><p class="field-caption">02 / DOS RESPUESTAS, UNA MISMA PRUEBA</p><div class="answer-grid">${answerPanel("A", c.answer_a)}${answerPanel("B", c.answer_b)}</div></div><section class="criteria-section"><p class="field-caption">03 / QUÉ VAS A COMPROBAR</p><ol class="criteria-list">${c.rules.map((r) => `<li>${esc(ruleDescription(r))}</li>`).join("")}</ol></section><aside class="inspector-note"><span aria-hidden="true">↳</span><p>Una regla comprueba una condición. <strong>Tu criterio completa la evaluación.</strong></p></aside></article>`;
+}
+function caseWorkspace() {
+  const cases = visibleCases();
+  if (!cases.some((c) => c.id === selectedCase))
+    selectedCase = cases[0]?.id || null;
+  return `<section class="case-index" aria-label="Biblioteca de casos"><div class="index-heading"><span>ÍNDICE DE CASOS</span><span aria-live="polite">${cases.length} / ${state.cases.length}</span></div><div class="case-list">${cases.map((c) => `<article class="case-card ${c.id === selectedCase ? "selected" : ""}"><button class="case-select" data-action="select-case" data-id="${c.id}" aria-pressed="${c.id === selectedCase}"><span class="case-number">${String(state.cases.indexOf(c) + 1).padStart(2, "0")}</span><span class="case-label"><strong>${esc(c.title)}</strong><span>${c.rules.length} ${c.rules.length === 1 ? "regla" : "reglas"} <span class="index-dot">·</span> <span class="${c.active ? "active-text" : "paused-text"}">${c.active ? "Activo" : "Pausado"}</span></span></span><span class="selection-arrow" aria-hidden="true">↗</span></button></article>`).join("") || `<p class="index-empty">Sin resultados.</p>`}</div><p class="index-footnote">Selecciona un caso para leer sus respuestas y criterios.</p></section><div id="case-inspector">${caseInspector(cases.find((c) => c.id === selectedCase))}</div>`;
+}
+function refreshCases() {
+  const scrollTop = $(".case-list")?.scrollTop || 0;
+  $("#case-workspace").innerHTML = caseWorkspace();
+  $(".case-list").scrollTop = scrollTop;
+}
 function caseView() {
   const active = state.cases.filter((c) => c.active).length;
   return (
     header(
-      "RESPUESTAS BAJO LA LUPA",
+      "01 / PREPARAR EL EXPERIMENTO",
       "Tus casos de prueba",
-      "Define qué esperas de una respuesta y comprueba si lo cumple.",
-      `<button class="button primary" data-action="new-case" data-write>＋ Nuevo caso</button>`,
+      "Pon dos respuestas frente a las mismas reglas. Después, cuestiona el resultado.",
+      `<button class="button secondary" data-action="new-case" data-write>＋ Nuevo caso</button>`,
     ) +
-    `<div class="intro-card"><div class="intro-icon" aria-hidden="true">◎</div><div><strong>Empieza con una pregunta concreta.</strong><p>1. Revisa un caso <span>→</span> 2. Prueba A y B <span>→</span> 3. Compara y añade tu criterio.</p><small>Los cuatro casos iniciales son ejemplos escritos a mano. No hay respuestas generadas por un modelo conectado.</small></div></div>
-  <div class="section-line"><h2>Biblioteca de casos <span>${state.cases.length}</span></h2><span class="muted">${active} ${active === 1 ? "activo" : "activos"} para la próxima evaluación</span></div>
-  <div class="case-grid">${state.cases.map((c, i) => `<article class="case-card"><div class="card-top"><span class="case-number">CASO ${String(i + 1).padStart(2, "0")}</span><span class="badge ${c.active ? "active" : "paused"}">${c.active ? "Activo" : "Pausado"}</span></div><h3>${esc(c.title)}</h3><p class="prompt-preview">${esc(c.prompt)}</p><div class="tags">${c.rules.map((r) => `<span>${esc(ruleDescription(r))}</span>`).join("")}</div><div class="card-bottom"><span>2 respuestas para comparar</span><button class="text-button" data-action="edit-case" data-id="${c.id}" data-write>Revisar caso <span aria-hidden="true">↗</span></button></div></article>`).join("") || `<div class="empty"><h3>Tu primer caso empieza aquí</h3><p>Escribe una instrucción, dos respuestas y al menos una regla.</p></div>`}</div>
-  <div class="bottom-action"><p><strong>Las reglas comprueban condiciones, no la calidad completa.</strong><br>Una respuesta útil puede fallar una regla demasiado estricta. Revísala con criterio.</p>${runButton}</div>`
+    `<div class="case-toolbar"><label class="search-field"><span aria-hidden="true">⌕</span><input type="search" id="case-search" aria-label="Buscar casos" placeholder="Buscar por nombre, instrucción o regla…" value="${esc(caseQuery)}"></label><label class="filter-field">Mostrar<select id="case-filter" aria-label="Estado de los casos"><option value="all" ${caseFilter === "all" ? "selected" : ""}>Todos los casos</option><option value="active" ${caseFilter === "active" ? "selected" : ""}>Solo activos</option><option value="paused" ${caseFilter === "paused" ? "selected" : ""}>Solo pausados</option></select></label></div><div class="case-workspace" id="case-workspace">${caseWorkspace()}</div><div class="experiment-bar"><div><span class="ready-dot" aria-hidden="true"></span><strong>${active} ${active === 1 ? "caso listo" : "casos listos"}</strong><span>Se evalúan todos los activos, aunque estén ocultos por el filtro.</span></div>${runButton}</div>`
   );
 }
 function stats(summary) {
-  return `<div class="stats"><div><small>Cumplen las reglas</small><strong>${summary.passed}<em> / ${summary.evaluated}</em></strong></div><div><small>No cumplen</small><strong>${summary.failed}</strong></div><div><small>Errores del evaluador</small><strong>${summary.error}</strong></div><div><small>Tasa de cumplimiento</small><strong>${summary.rate === null ? "—" : summary.rate + "%"}</strong></div></div><p class="metric-note">${summary.total} casos en total. Los errores del evaluador se excluyen de la tasa; revisa ese número antes de interpretar el porcentaje.</p>`;
+  return `<div class="score-sheet"><div class="score-total"><span class="field-caption">CUMPLIMIENTO</span><strong>${summary.rate === null ? "—" : summary.rate + "%"}</strong><span>${summary.passed} de ${summary.evaluated} casos evaluables</span></div><dl class="score-breakdown"><div><dt><span class="status-dot"></span>Cumplen</dt><dd>${summary.passed}</dd></div><div><dt><span class="status-dot failed-dot"></span>No cumplen</dt><dd>${summary.failed}</dd></div><div><dt><span class="status-dot error-dot"></span>Errores del evaluador</dt><dd>${summary.error}</dd></div></dl><p class="score-explainer">El porcentaje mide <strong>cumplimiento de reglas</strong>, no calidad general.<br>Los errores del evaluador se excluyen del cálculo.</p></div>`;
 }
 function runView() {
   return (
     header(
-      "CADA PRUEBA DEJA UN REGISTRO",
+      "02 / REGISTRO DE EXPERIMENTOS",
       "Ejecuciones",
       "Conserva las respuestas y reglas exactas de cada evaluación.",
       runButton,
@@ -157,7 +197,7 @@ function runDetail(run) {
   return (
     `<button class="back" data-action="back-runs">← Todas las ejecuciones</button>` +
     header(
-      "RESULTADOS DE LA EVALUACIÓN",
+      "02 / INFORME DE EVALUACIÓN",
       esc(run.name),
       `Respuesta ${run.variant.toUpperCase()} · ${date(run.created_at)} · Reglas y respuestas conservadas`,
     ) +
@@ -206,13 +246,13 @@ function compareView(a, b) {
   };
   return (
     header(
-      "OBSERVA QUÉ CAMBIÓ",
+      "03 / CONTRASTAR LA EVIDENCIA",
       "Comparar ejecuciones",
       "Compara sobre los mismos casos y criterios antes de sacar conclusiones.",
     ) +
     `<div class="compare-selectors"><label>Ejecución de referencia<select id="compare-a">${comparisonOptions(a.id)}</select></label><span aria-hidden="true">→</span><label>Ejecución a comparar<select id="compare-b">${comparisonOptions(b.id)}</select></label></div>
   ${same ? `<p class="alert warning">Seleccionaste la misma ejecución. Elige dos distintas.</p>` : !comparable ? `<p class="alert warning">Los casos o criterios cambiaron. Las tasas no son comparables y no se calcula una diferencia global.</p>` : errors ? `<p class="alert warning">Hay errores del evaluador. Resuélvelos antes de interpretar una diferencia global.</p>` : `<div class="comparison-callout"><div><small>MISMOS CASOS Y CRITERIOS</small><h2>${delta === 0 ? "Mismo porcentaje, revisa cada caso." : `Diferencia: ${delta > 0 ? "+" : ""}${delta} puntos porcentuales`}</h2><p>${rateA}% → ${rateB}%. Este porcentaje mide reglas, no calidad general de un modelo.</p></div><span class="compare-mark" aria-hidden="true">⇄</span></div>`}
-  <div class="table-wrap"><table><caption class="sr-only">Cambios de resultado entre ejecuciones</caption><thead><tr><th>Caso</th><th>Referencia</th><th>Comparación</th><th>Lectura</th></tr></thead><tbody>${[...pairs.values()].map(({ a: left, b: right }) => `<tr><td><strong>${esc((right || left).snapshot.title)}</strong></td><td>${left ? badge(left.evaluation.status) : "No incluido"}</td><td>${right ? badge(right.evaluation.status) : "No incluido"}</td><td>${esc(verdict(left, right))}</td></tr>`).join("")}</tbody></table></div><p class="metric-note">La revisión humana permanece en cada ejecución. Un empate global puede ocultar mejoras en unos casos y retrocesos en otros.</p><div class="compare-links"><button class="button secondary" data-action="open-run" data-id="${a.id}">Abrir referencia</button><button class="button secondary" data-action="open-run" data-id="${b.id}">Abrir comparación</button></div>`
+  <div class="comparison-ledger"><div class="ledger-heading"><span>CASO / ABRE PARA VER LAS RESPUESTAS</span><span>REFERENCIA</span><span>COMPARACIÓN</span><span>QUÉ CAMBIÓ</span></div>${[...pairs.values()].map(({ a: left, b: right }, i) => `<details class="comparison-row"><summary><strong><span class="case-number">${String(i + 1).padStart(2, "0")}</span>${esc((right || left).snapshot.title)}</strong><span class="ledger-status"><small>Referencia</small>${left ? badge(left.evaluation.status) : "No incluido"}</span><span class="ledger-status"><small>Comparación</small>${right ? badge(right.evaluation.status) : "No incluido"}</span><span class="change-label">${esc(verdict(left, right))}</span></summary><div class="comparison-evidence"><div class="answer-grid">${[left, right].map((r, index) => `<div>${r ? answerPanel(index ? "C" : "R", r.answer, index ? "Ejecución a comparar" : "Ejecución de referencia") + `<p class="evidence-context"><strong>Instrucción:</strong> ${esc(r.snapshot.prompt)}</p><ul class="evidence-rules">${r.snapshot.rules.map((rule) => `<li>${esc(ruleDescription(rule))}</li>`).join("")}</ul>` : `<p class="muted">Este caso no está incluido en esta ejecución.</p>`}</div>`).join("")}</div><p class="help">R: referencia · C: comparación. Cada columna conserva la instrucción y las reglas usadas en esa ejecución.</p></div></details>`).join("")}</div><p class="metric-note">La revisión humana permanece en cada ejecución. Un empate global puede ocultar mejoras en unos casos y retrocesos en otros.</p><div class="compare-links"><button class="button secondary" data-action="open-run" data-id="${a.id}">Abrir referencia</button><button class="button secondary" data-action="open-run" data-id="${b.id}">Abrir comparación</button></div>`
   );
 }
 async function render() {
@@ -234,7 +274,7 @@ async function render() {
     } else if (state.runs.length < 2)
       $("#main").innerHTML =
         header(
-          "UNA COMPARACIÓN JUSTA",
+          "03 / CONTRASTAR LA EVIDENCIA",
           "Comparar ejecuciones",
           "Necesitas dos ejecuciones para ver qué cambió.",
         ) +
@@ -290,6 +330,19 @@ document.addEventListener("click", async (event) => {
   if (!button || busy) return;
   const { action, id } = button.dataset;
   if (action === "close") closeDialog();
+  if (action === "select-case") {
+    selectedCase = id;
+    refreshCases();
+    $("#inspector-title").focus({ preventScroll: true });
+    if (matchMedia("(max-width: 760px)").matches)
+      $("#case-inspector").scrollIntoView({ block: "start" });
+  }
+  if (action === "clear-search") {
+    caseQuery = "";
+    caseFilter = "all";
+    await render();
+    $("#case-search").focus();
+  }
   if (action === "nav") {
     view = button.dataset.view;
     selectedRun = null;
@@ -319,8 +372,19 @@ document.addEventListener("click", async (event) => {
     }
   }
 });
+document.addEventListener("input", (event) => {
+  if (event.target.id === "case-search") {
+    caseQuery = event.target.value;
+    refreshCases();
+  }
+});
+
 document.addEventListener("change", async (event) => {
   const input = event.target;
+  if (input.id === "case-filter") {
+    caseFilter = input.value;
+    refreshCases();
+  }
   if (input.dataset.rule) {
     const field = dialog.querySelector(`[name="value-${input.dataset.rule}"]`);
     field.disabled = !input.checked;
@@ -361,7 +425,11 @@ document.addEventListener("submit", async (event) => {
         active: data.has("active"),
       },
     };
-    if (await write(command)) {
+    const saved = await write(command);
+    if (saved) {
+      selectedCase = saved.id || form.dataset.id;
+      caseQuery = "";
+      caseFilter = "all";
       closeDialog();
       await render();
       notice("Caso guardado");

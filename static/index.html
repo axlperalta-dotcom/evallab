@@ -3,70 +3,44 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f3ed" />
     <title>EvalLab — Respuestas bajo la lupa</title>
     <link rel="icon" href="/favicon.svg" />
     <link rel="stylesheet" href="/styles.css" />
     <script type="module" src="/app.js"></script>
   </head>
   <body>
-    <aside class="sidebar">
+    <a class="skip-link" href="#main">Ir al contenido</a>
+    <header class="masthead">
       <a class="brand" href="/" aria-label="EvalLab, inicio"
-        ><span class="brand-icon">e/</span>Eval<span>Lab</span><i></i
-      ></a>
-      <div class="workspace">
-        <span class="avatar">EL</span>
-        <div>Laboratorio personal<small>Tu espacio de evaluación</small></div>
-      </div>
-      <p class="nav-label">TU LABORATORIO</p>
+        ><span class="brand-icon" aria-hidden="true">e/</span>EvalLab<span
+          class="edition"
+          >LABORATORIO DE RESPUESTAS</span
+        ></a
+      >
+      <span class="local-label"
+        ><span class="status-dot"></span>Guardado local</span
+      >
+    </header>
+    <div class="navigation-bar">
       <nav aria-label="Navegación principal">
         <button data-action="nav" data-view="cases" aria-current="page">
-          <span aria-hidden="true">▤</span>Casos<span
-            id="case-count"
-            class="nav-count"
-          ></span>
+          Casos <span id="case-count" class="nav-count"></span>
         </button>
         <button data-action="nav" data-view="runs">
-          <span aria-hidden="true">▷</span>Ejecuciones<span
-            id="run-count"
-            class="nav-count"
-          ></span>
+          Ejecuciones <span id="run-count" class="nav-count"></span>
         </button>
-        <button data-action="nav" data-view="compare">
-          <span aria-hidden="true">⇄</span>Comparar
-        </button>
+        <button data-action="nav" data-view="compare">Comparar</button>
       </nav>
-      <div class="side-note">
-        <span class="tiny-symbol" aria-hidden="true">◎</span
-        ><strong>Una regla no lo dice todo.</strong>
-        <p>
-          Revisa los resultados y añade tu criterio. Tú también formas parte de
-          la evaluación.
-        </p>
-      </div>
-      <footer>
-        <span class="status-dot"></span>
-        <div>Solo en tu computadora<small>Python · Guardado local</small></div>
-      </footer>
-    </aside>
-    <div class="shell">
-      <header class="topbar">
-        <span
-          >Mi laboratorio <span class="slash">/</span>
-          <strong id="breadcrumb">Casos</strong></span
-        ><span class="local-label"
-          ><span class="status-dot"></span>Sin conexión a modelos</span
-        >
-      </header>
-      <main id="main" tabindex="-1">
-        <p class="loading">Cargando tu laboratorio…</p>
-      </main>
-      <div class="page-footer">
-        <span
-          >EvalLab <span class="slash">/</span> Observa. Comprueba.
-          Aprende.</span
-        ><span>Prototipo local · v0.1</span>
-      </div>
+      <span class="navigation-note">Observa. Comprueba. Cuestiona.</span>
     </div>
+    <main id="main" tabindex="-1">
+      <p class="loading">Cargando tu laboratorio…</p>
+    </main>
+    <footer class="page-footer">
+      <span>EvalLab / <span id="breadcrumb">Casos</span></span
+      ><span>Respuestas escritas a mano · Sin conexión a modelos</span>
+    </footer>
     <dialog id="dialog" aria-labelledby="dialog-title">
       <button class="close" data-action="close" aria-label="Cerrar">×</button>
       <div id="dialog-content"></div>

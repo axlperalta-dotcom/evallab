@@ -6,15 +6,16 @@ Proyecto personal de portafolio inspirado en requisitos de Product Engineer: Pyt
 
 ![Biblioteca de casos de EvalLab](docs/images/cases.png)
 
-Captura de la aplicación con sus cuatro casos de demostración. No contiene respuestas de un modelo conectado.
+Mesa de trabajo con índice de casos y lectura simultánea de las respuestas A y B. Captura con los cuatro casos de demostración. No contiene respuestas de un modelo conectado.
 
 ## Qué puedes hacer
 
+- Buscar casos por nombre, instrucción o regla, filtrar activos y pausados, y leer A/B en una ficha compartida.
 - Crear, editar, pausar y eliminar casos con una instrucción y dos respuestas, A y B.
 - Combinar hasta cuatro reglas: texto obligatorio, texto excluido, longitud máxima y campos de un objeto JSON.
 - Ejecutar los casos activos y conservar las respuestas y reglas exactas usadas.
 - Revisar cada comprobación y registrar si estás de acuerdo, en desacuerdo o necesitas revisarla.
-- Comparar ejecuciones con los mismos casos y criterios, identificando cambios por caso.
+- Comparar ejecuciones con los mismos casos y criterios; desplegar cada caso para leer las respuestas y reglas originales de ambas ejecuciones.
 - Conservar el historial aunque después edites o elimines un caso.
 
 ## Inicio
@@ -45,7 +46,7 @@ Los datos se guardan en `.data/evallab.sqlite3`, excluido de Git. `EVALLAB_DATA_
 4. Añade una revisión en desacuerdo y explica el contexto. El resultado automático se conserva, separado de tu criterio.
 5. Ejecuta las respuestas B sin cambiar casos ni reglas. En **Comparar**, observa que ambas ejecuciones tienen 50%, pero fallan casos distintos.
 
-Ese empate es deliberado: sirve para mostrar por qué una cifra global no basta para evaluar un sistema. [Guía de pruebas](docs/GUIA-DE-PRUEBAS.md).
+Ese empate es deliberado: sirve para mostrar por qué una cifra global no basta para evaluar un sistema. [Guía de pruebas](docs/GUIA-DE-PRUEBAS.md). [Investigación y decisiones de diseño](docs/DISENO.md).
 
 ![Comparación de las respuestas A y B en EvalLab](docs/images/comparison.png)
 
@@ -92,10 +93,10 @@ npm run test:e2e
 
 En macOS/Linux sustituye `py -3` por `python3`. Node.js 22 o superior solo es necesario para las pruebas de navegador. Las pruebas Python usan carpetas temporales; las de navegador usan el puerto 3013 y una carpeta nueva `.data/test-browser-*` en cada ejecución. No modifican la base personal. La aplicación sirve sin compilarse.
 
-La suite inicial contiene 22 pruebas Python y 4 pruebas de navegador, incluidas fuentes alternativas y anchos de 320 a 390 píxeles. Los resultados efectivos se consultan en GitHub Actions; tener un workflow no significa que un commit haya aprobado.
+La suite contiene 22 pruebas Python y 6 pruebas de navegador, incluidas fuentes alternativas y anchos de 320 a 390 píxeles. Los resultados efectivos se consultan en GitHub Actions; tener un workflow no significa que un commit haya aprobado.
 
 ## Desarrollo y alcance del portafolio
 
-Desarrollado con asistencia de IA. El responsable del producto elige requisitos y revisa la experiencia; la implementación y las pruebas iniciales se prepararon con asistencia de Codex. La primera revisión manual del usuario de EvalLab está pendiente. No se atribuye experiencia de producción, clientes, métricas de negocio ni dominio independiente de todo el código.
+Desarrollado con asistencia de IA. El responsable del producto elige requisitos y revisa la experiencia; la implementación y las pruebas iniciales se prepararon con asistencia de Codex. El usuario revisó la primera versión y confirmó que las funciones se entendían; pidió diferenciar la interfaz de CareerOps. Este rediseño responde a esa observación y queda disponible para una nueva revisión visual. No se atribuye experiencia de producción, clientes, métricas de negocio ni dominio independiente de todo el código.
 
 Próximas etapas posibles: probar casos propios, ajustar criterios después de revisar discrepancias y, después, conectar un modelo real con registro de versión y coste. La prioridad actual es aprender a distinguir una respuesta fallida de una regla inadecuada o un evaluador defectuoso.
