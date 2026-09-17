@@ -41,3 +41,11 @@ Impacto: me bloquea / me dificulta / detalle visual
 ```
 
 También sirven observaciones como «no entiendo qué cuenta este porcentaje», «no encuentro dónde cambiar una respuesta» o «esta regla está calificando algo distinto de lo que quiero». Esas decisiones guían la siguiente versión.
+
+## Comprobar español e inglés
+
+1. Cambia **Idioma → English** en el encabezado. Revisa Cases, Runs, Compare y Guide.
+2. Abre un caso existente: su contenido original debe permanecer igual, aunque los controles estén en inglés.
+3. Recarga: la interfaz debe seguir en inglés. Vuelve a **Language → Español** para recuperar el español.
+4. Escribe una revisión sin guardarla, cambia de idioma y comprueba que la nota y la valoración se conservan.
+5. Prueba el selector en una ventana estrecha. Si tu navegador bloquea el almacenamiento, la aplicación debe permitir cambiar de idioma y avisar que no pudo guardar la preferencia.

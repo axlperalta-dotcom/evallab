@@ -42,3 +42,11 @@ No hay autenticación, cifrado de aplicación ni aislamiento entre usuarios. Se 
 El esquema inicial usa `CREATE TABLE IF NOT EXISTS`; los siguientes cambios de columnas necesitarán un sistema explícito de migraciones. La biblioteca y la lista de ejecuciones se cargan completas, sin paginación. No hay poda automática del historial ni garantías de creación exactamente una vez ante interrupciones de red: si una respuesta de guardado se pierde, revisa el historial antes de repetir.
 
 Las reglas de texto no entienden contexto; las de JSON comprueban presencia, no corrección. El porcentaje no es una medida de calidad general. La siguiente decisión de producto debe basarse en los casos y discrepancias que detecte el usuario antes de introducir un juez LLM o puntuaciones ponderadas.
+
+## Idiomas de la interfaz
+
+El selector superior permite español (por defecto) e inglés. `static/en.js` contiene el catálogo de traducciones y `static/i18n.js` resuelve textos y mensajes conocidos del evaluador. No se usa un plugin de traducción automática ni se envía contenido a terceros. La preferencia se guarda bajo `evallab.language` en el almacenamiento local del navegador; si está bloqueado, el idioma funciona en la pestaña actual y se avisa que no se pudo recordar.
+
+Los textos dinámicos se traducen explícitamente con `t(...)`. El encabezado y pie conservan una copia de sus textos originales antes de cargar datos. Los nombres, instrucciones, respuestas, términos de las reglas y notas del usuario nunca se traducen. Los mensajes de evaluaciones históricas se presentan en el idioma elegido, conservando sus valores originales en la base. Las fechas usan el formato del idioma de la interfaz.
+
+Al cambiar de idioma se conserva la vista, las secciones desplegadas, los filtros y los borradores de revisiones. El selector se desactiva durante escrituras y queda fuera del diálogo modal, por lo que no puede descartar un formulario abierto. Los avisos nativos de validación del navegador pueden seguir el idioma del navegador o del sistema. La elección es por navegador y origen local, no una configuración compartida entre dispositivos.

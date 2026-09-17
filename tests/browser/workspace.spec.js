@@ -377,3 +377,198 @@ test("guide explains the workflow and privacy, supports keyboard navigation and 
   await expect(page.locator("#main")).toBeFocused();
   expect(await (await request.get("/api/workspace")).json()).toEqual(before);
 });
+
+test("language preference translates the UI and guide without changing stored content", async ({
+  page,
+  request,
+}) => {
+  const before = await (await request.get("/api/workspace")).json();
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("evallab.language"))
+      localStorage.setItem("evallab.language", "unknown");
+  });
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "es");
+  await page
+    .getByRole("combobox", { name: "Idioma", exact: true })
+    .selectOption("en");
+  await expect(
+    page.getByRole("heading", { name: "Your test cases" }),
+  ).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page).toHaveTitle("EvalLab — Answers under the microscope");
+  await expect(page.locator("#inspector-title")).toHaveText(
+    before.cases[0].title,
+  );
+  await expect(page.locator(".answer-panel pre").first()).toHaveText(
+    before.cases[0].answer_a,
+  );
+  await page.screenshot({ path: ".data/cases-english.png", fullPage: true });
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Guide", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Privacy and use", exact: true })
+    .click();
+  const privacy = page
+    .locator(".guide-questions details")
+    .filter({ hasText: "Where is my data stored?" });
+  await privacy.locator("summary").click();
+  await expect(privacy).toContainText(
+    "The app has no sign-in and does not encrypt the database.",
+  );
+  await page
+    .getByRole("combobox", { name: "Language", exact: true })
+    .selectOption("es");
+  await expect(page.locator(".guide-questions details[open]")).toContainText(
+    "¿Dónde se guardan mis datos?",
+  );
+  await page
+    .getByRole("combobox", { name: "Idioma", exact: true })
+    .selectOption("en");
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Your test cases" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("combobox", { name: "Language", exact: true }),
+  ).toHaveValue("en");
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  }
+  await page.screenshot({
+    path: ".data/cases-english-mobile.png",
+    fullPage: false,
+  });
+  expect(await (await request.get("/api/workspace")).json()).toEqual(before);
+});
+
+test("English forms, evaluation messages and comparisons preserve user text and unsaved reviews", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/");
+  await page
+    .getByRole("combobox", { name: "Idioma", exact: true })
+    .selectOption("en");
+  await page.getByRole("button", { name: "New case" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Case name").fill("Guía");
+  await dialog.getByLabel("Original prompt").fill("Casos");
+  await dialog
+    .getByLabel("Answer A", { exact: true })
+    .fill("Casos <script>literal</script>");
+  await dialog.getByLabel("Answer B", { exact: true }).fill("Guía");
+  await dialog.getByLabel("Must include", { exact: true }).uncheck();
+  await dialog.getByRole("button", { name: "Save case" }).click();
+  await expect(dialog.getByRole("alert")).toContainText(
+    "Enable between one and four rules",
+  );
+  await expect(dialog.getByLabel("Case name")).toHaveValue("Guía");
+  await dialog.getByLabel("Must include", { exact: true }).check();
+  await dialog.locator('[name="value-contains"]').fill("Guía");
+  await dialog.getByRole("button", { name: "Save case" }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.locator("#inspector-title")).toHaveText("Guía");
+  await expect(page.locator("#case-inspector script")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Run evaluation", exact: true })
+    .click();
+  await dialog.getByLabel("Run name").fill("English workflow A");
+  await dialog.getByRole("button", { name: /Evaluate \d+ cases/ }).click();
+  const result = page.locator(".result-card").filter({ hasText: "Guía" });
+  await result.locator("summary").click();
+  await expect(result.locator("pre")).toHaveText(
+    "Casos <script>literal</script>",
+  );
+  await expect(result).toContainText("Missing: Guía");
+  await result.getByLabel("Assessment").selectOption("disagree");
+  await result
+    .getByLabel("Explanation")
+    .fill("Guía, Casos: mi nota sin traducir.");
+  await page
+    .getByRole("combobox", { name: "Language", exact: true })
+    .selectOption("es");
+  await expect(result).toHaveAttribute("open", "");
+  await expect(result.getByLabel("Valoración")).toHaveValue("disagree");
+  await expect(result.getByLabel("Explicación")).toHaveValue(
+    "Guía, Casos: mi nota sin traducir.",
+  );
+  await page
+    .getByRole("combobox", { name: "Idioma", exact: true })
+    .selectOption("en");
+  await result.getByRole("button", { name: "Save review" }).click();
+  await expect(result.locator("summary")).toContainText("Review: Disagree");
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: /Runs/ })
+    .click();
+  await page
+    .getByRole("button", { name: "Run evaluation", exact: true })
+    .click();
+  await dialog.getByLabel("Run name").fill("English workflow B");
+  await dialog.getByLabel("Answers to test").selectOption("b");
+  await dialog.getByRole("button", { name: /Evaluate \d+ cases/ }).click();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Compare", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Compare runs" }),
+  ).toBeVisible();
+  const row = page.locator(".comparison-row").filter({ hasText: "Guía" });
+  await expect(row).toContainText("Now passes");
+  await row.locator("summary").click();
+  await expect(row.locator("pre").first()).toHaveText(
+    "Casos <script>literal</script>",
+  );
+  const workspace = await (await request.get("/api/workspace")).json();
+  const createdCase = workspace.cases.find((item) => item.title === "Guía");
+  expect(createdCase.rules[0].value).toEqual(["Guía"]);
+  const run = workspace.runs.find((item) => item.name === "English workflow A");
+  const original = await (await request.get(`/api/run?id=${run.id}`)).json();
+  const saved = original.results.find(
+    (item) => item.case_id === createdCase.id,
+  );
+  expect(saved.evaluation.checks[0].detail).toBe("Falta: Guía");
+  expect(saved.review.note).toBe("Guía, Casos: mi nota sin traducir.");
+  await request.post("/api/command", {
+    data: { type: "delete_case", id: createdCase.id },
+  });
+});
+
+test("language switching still works when browser storage is blocked", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Storage.prototype.getItem = () => {
+      throw new DOMException("Blocked", "SecurityError");
+    };
+    Storage.prototype.setItem = () => {
+      throw new DOMException("Blocked", "SecurityError");
+    };
+  });
+  await page.goto("/");
+  await page
+    .getByRole("combobox", { name: "Idioma", exact: true })
+    .selectOption("en");
+  await expect(
+    page.getByRole("heading", { name: "Your test cases" }),
+  ).toBeVisible();
+  await expect(page.getByRole("status")).toContainText(
+    "Your language preference could not be saved",
+  );
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Guide", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Your EvalLab guide" }),
+  ).toBeVisible();
+});

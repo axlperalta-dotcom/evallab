@@ -10,7 +10,7 @@ from evaluator import InvalidCase
 from storage import Store, NotFound
 
 ROOT = Path(__file__).resolve().parent
-STATIC = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/styles.css": ("styles.css", "text/css; charset=utf-8"), "/favicon.svg": ("favicon.svg", "image/svg+xml")}
+STATIC = {"/i18n.js": ("i18n.js", "text/javascript; charset=utf-8"), "/en.js": ("en.js", "text/javascript; charset=utf-8"), "/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/styles.css": ("styles.css", "text/css; charset=utf-8"), "/favicon.svg": ("favicon.svg", "image/svg+xml")}
 
 
 def make_handler(store):

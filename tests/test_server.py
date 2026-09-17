@@ -39,6 +39,11 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(len(json.loads(body)["cases"]), 4)
         self.assertEqual(headers["Cache-Control"], "no-store")
         self.assertEqual(self.request("/")[0], 200)
+        for path in ("/i18n.js", "/en.js"):
+            status, body, headers = self.request(path)
+            self.assertEqual(status, 200)
+            self.assertIn("javascript", headers["Content-Type"])
+            self.assertIn(b"export", body)
 
     def test_external_origin_and_host_are_blocked(self):
         self.assertEqual(self.request("/api/workspace", headers={"Host": "attacker.example"})[0], 403)
